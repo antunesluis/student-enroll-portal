@@ -1,6 +1,7 @@
 import jwt from 'jsonwebtoken';
+import User from '../models/User';
 
-const authMiddleware = (req, res, next) => {
+export default async (req, res, next) => {
   const authHeader = req.headers.authorization;
 
   if (!authHeader) {
@@ -29,7 +30,21 @@ const authMiddleware = (req, res, next) => {
     const decoded = jwt.verify(token, process.env.TOKEN_SECRET);
     const { id, email } = decoded;
 
-    req.user = { id, email };
+    const user = await User.findOne({
+      where: {
+        id,
+        email,
+      },
+    });
+
+    if (!user) {
+      return res.status(401).json({
+        error: 'Usuário inválido',
+      });
+    }
+
+    req.userId = id;
+    req.userEmail = email;
 
     return next();
   } catch (error) {
@@ -49,5 +64,3 @@ const authMiddleware = (req, res, next) => {
     });
   }
 };
-
-export default authMiddleware;

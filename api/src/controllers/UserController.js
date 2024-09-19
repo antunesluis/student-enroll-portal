@@ -32,9 +32,11 @@ class UserController {
       const user = await User.findByPk(req.params.id, {
         attributes: ['id', 'nome', 'email'],
       });
+
       if (!user) {
         return res.status(404).json({ error: 'Usuário não encontrado' });
       }
+
       return res.json(user);
     } catch (e) {
       console.error('Erro ao buscar usuário:', e);
@@ -44,18 +46,14 @@ class UserController {
 
   async update(req, res) {
     try {
-      const { id } = req.params;
-      if (!id) {
-        return res.status(400).json({ error: 'ID não enviado' });
-      }
-
-      const user = await User.findByPk(id);
+      const user = await User.findByPk(req.userId);
       if (!user) {
         return res.status(404).json({ error: 'Usuário não encontrado' });
       }
 
       const novosDados = await user.update(req.body);
-      const { nome, email } = novosDados;
+      const { id, nome, email } = novosDados;
+
       return res.json({ id, nome, email });
     } catch (e) {
       return res.status(400).json({
@@ -68,12 +66,7 @@ class UserController {
 
   async delete(req, res) {
     try {
-      const { id } = req.params;
-      if (!id) {
-        return res.status(400).json({ error: 'ID não enviado' });
-      }
-
-      const user = await User.findByPk(id);
+      const user = await User.findByPk(req.userId);
       if (!user) {
         return res.status(404).json({ error: 'Usuário não encontrado' });
       }
