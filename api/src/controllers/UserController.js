@@ -1,14 +1,15 @@
-import user from '../models/User';
+import User from '../models/User';
 
 class UserController {
   async store(req, res) {
     try {
-      const novouser = await user.create(req.body);
-      return res.status(201).json(novouser);
+      const novoUser = await User.create(req.body);
+      const { id, nome, email } = novoUser;
+      return res.status(201).json({ id, nome, email });
     } catch (e) {
       return res.status(400).json({
         errors: e.errors?.map((err) => err.message) || [
-          'erro ao criar usuário',
+          'Erro ao criar usuário',
         ],
       });
     }
@@ -16,26 +17,28 @@ class UserController {
 
   async index(req, res) {
     try {
-      const users = await user.findall({
-        attributes: { exclude: ['password_hash'] },
+      const users = await User.findAll({
+        attributes: ['id', 'nome', 'email'],
       });
       return res.json(users);
     } catch (e) {
-      return res.status(500).json({ error: 'erro interno do servidor' });
+      console.error('Erro ao listar usuários:', e);
+      return res.status(500).json({ error: 'Erro interno do servidor' });
     }
   }
 
   async show(req, res) {
     try {
-      const user = await user.findbypk(req.params.id, {
-        attributes: { exclude: ['password_hash'] },
+      const user = await User.findByPk(req.params.id, {
+        attributes: ['id', 'nome', 'email'],
       });
       if (!user) {
-        return res.status(404).json({ error: 'usuário não encontrado' });
+        return res.status(404).json({ error: 'Usuário não encontrado' });
       }
       return res.json(user);
     } catch (e) {
-      return res.status(500).json({ error: 'erro interno do servidor' });
+      console.error('Erro ao buscar usuário:', e);
+      return res.status(500).json({ error: 'Erro interno do servidor' });
     }
   }
 
@@ -43,20 +46,21 @@ class UserController {
     try {
       const { id } = req.params;
       if (!id) {
-        return res.status(400).json({ error: 'id não enviado' });
+        return res.status(400).json({ error: 'ID não enviado' });
       }
 
-      const user = await user.findbypk(id);
+      const user = await User.findByPk(id);
       if (!user) {
-        return res.status(404).json({ error: 'usuário não encontrado' });
+        return res.status(404).json({ error: 'Usuário não encontrado' });
       }
 
-      const novosdados = await user.update(req.body);
-      return res.json(novosdados);
+      const novosDados = await user.update(req.body);
+      const { nome, email } = novosDados;
+      return res.json({ id, nome, email });
     } catch (e) {
       return res.status(400).json({
         errors: e.errors?.map((err) => err.message) || [
-          'erro ao atualizar usuário',
+          'Erro ao atualizar usuário',
         ],
       });
     }
@@ -66,29 +70,21 @@ class UserController {
     try {
       const { id } = req.params;
       if (!id) {
-        return res.status(400).json({ error: 'id não enviado' });
+        return res.status(400).json({ error: 'ID não enviado' });
       }
 
-      const user = await user.findbypk(id);
+      const user = await User.findByPk(id);
       if (!user) {
-        return res.status(404).json({ error: 'usuário não encontrado' });
+        return res.status(404).json({ error: 'Usuário não encontrado' });
       }
 
       await user.destroy();
       return res.status(204).send();
     } catch (e) {
-      return res.status(500).json({ error: 'erro ao deletar usuário' });
+      console.error('Erro ao deletar usuário:', e);
+      return res.status(500).json({ error: 'Erro ao deletar usuário' });
     }
   }
 }
 
 export default new UserController();
-
-/*
-metodos utilizados pelos controllers (nao deve possur mais que isso)
-- index -> lista todos os usuários -> get
-- store/create -> cria um novo usuário -> post
-- delete -> apaga um usuário -> delete 
-- show -> mostra um usuário -> get 
-- update -> atualiza um usuário -> patch ou put
-*/
