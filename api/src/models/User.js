@@ -10,14 +10,17 @@ export default class User extends Model {
           defaultValue: '',
           validate: {
             len: {
-              args: [4, 255],
-              msg: 'Campo nome deve ter entre 4 e 255 caracteres',
+              args: [3, 255],
+              msg: 'Campo nome deve ter entre 3 e 255 caracteres',
             },
           },
         },
         email: {
           type: Sequelize.STRING,
           defaultValue: '',
+          unique: {
+            msg: 'Email já existe',
+          },
           validate: {
             isEmail: {
               msg: 'Email inválido',
@@ -45,11 +48,12 @@ export default class User extends Model {
     );
 
     this.addHook('beforeSave', async (user) => {
-      // talvez retirar o if
       if (user.password) {
         user.password_hash = await bcryptjs.hash(user.password, 8);
       }
     });
+
+    return this;
   }
 
   passwordIsValid(password) {

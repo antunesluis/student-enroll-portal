@@ -10,7 +10,7 @@ router.get('/:id', userController.show);
 router.get('/', loginRequired, userController.index);
 
 // Afetam o usuário que está no token
-router.post('/', userController.store);
+//router.post('/', userController.store);
 router.put('/', loginRequired, userController.update);
 router.delete('/', loginRequired, userController.delete);
 
